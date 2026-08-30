@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import AuthPage from './pages/AuthPage';
 import AnimatedCrops from './components/AnimatedCrops';
 import ThemeToggle from './components/ThemeToggle';
+import Chatbot from './components/Chatbot';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -108,7 +109,8 @@ function App() {
           <Route path="/" element={isAuthenticated ? <Dashboard /> : <Navigate to="/auth" />} />
         </Routes>
       </main>
-      
+
+      {isAuthenticated && <Chatbot />}
     </div>
   );
 }

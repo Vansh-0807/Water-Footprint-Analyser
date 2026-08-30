@@ -7,8 +7,6 @@
   --color-secondary-dark: #a16207;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
 :root {
   --bg-color: #f0fdf4;
   --text-color: #1c1917;
