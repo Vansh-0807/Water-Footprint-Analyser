@@ -6,10 +6,14 @@ function AuthPage({ setIsAuthenticated }) {
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     
     if (isForgotPassword) {
       setCodeSent(true);
@@ -20,10 +24,28 @@ function AuthPage({ setIsAuthenticated }) {
       return;
     }
 
-    setTimeout(() => {
-      setIsAuthenticated(true);
-      navigate('/');
-    }, 1000);
+    if (isLogin) {
+      try {
+        const response = await fetch('http://localhost:8000/api/token/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem('access_token', data.access);
+          localStorage.setItem('refresh_token', data.refresh);
+          setIsAuthenticated(true);
+          navigate('/');
+        } else {
+          setError('Invalid username or password.');
+        }
+      } catch (err) {
+        setError('Cannot connect to server. Is Django running?');
+      }
+    }
   };
 
   return (
@@ -79,19 +101,27 @@ function AuthPage({ setIsAuthenticated }) {
                 )}
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-stone-700 dark:text-stone-300 transition-colors duration-500">Email Address</label>
+                  <label className="text-sm font-medium text-stone-700 dark:text-stone-300 transition-colors duration-500">Username</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-stone-400 dark:text-stone-500 transition-colors duration-500" />
+                      <User className="h-5 w-5 text-stone-400 dark:text-stone-500 transition-colors duration-500" />
                     </div>
                     <input 
-                      type="email" 
+                      type="text" 
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       required
                       className="w-full pl-10 pr-4 py-2.5 bg-white/60 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/60 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500 text-stone-800 dark:text-stone-100 backdrop-blur-sm"
-                      placeholder="farmer@example.com"
+                      placeholder="farmer123"
                     />
                   </div>
                 </div>
+
+                {error && (
+                  <div className="p-3 bg-red-100/80 dark:bg-red-900/40 border border-red-200 dark:border-red-800/50 rounded-xl text-red-600 dark:text-red-400 text-sm text-center font-medium animate-pulse">
+                    {error}
+                  </div>
+                )}
 
                 {!isForgotPassword && (
                   <div className="space-y-2">
@@ -113,6 +143,8 @@ function AuthPage({ setIsAuthenticated }) {
                       </div>
                       <input 
                         type="password" 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         required
                         className="w-full pl-10 pr-4 py-2.5 bg-white/60 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/60 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500 text-stone-800 dark:text-stone-100 backdrop-blur-sm"
                         placeholder="••••••••"
