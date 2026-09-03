@@ -45,6 +45,43 @@ function AuthPage({ setIsAuthenticated }) {
       } catch (err) {
         setError('Cannot connect to server. Is Django running?');
       }
+    } else {
+      // SIGN UP LOGIC
+      try {
+        // First we register the user
+        const registerResponse = await fetch('http://localhost:8000/api/register/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            username: username, 
+            password: password, 
+            full_name: document.getElementById('fullname-input')?.value || '' 
+          })
+        });
+
+        if (registerResponse.ok) {
+          // If registration succeeded, we automatically log them in!
+          const loginResponse = await fetch('http://localhost:8000/api/token/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+          const data = await loginResponse.json();
+          
+          if (loginResponse.ok) {
+            localStorage.setItem('access_token', data.access);
+            localStorage.setItem('refresh_token', data.refresh);
+            setIsAuthenticated(true);
+            navigate('/');
+          }
+        } else {
+          const errorData = await registerResponse.json();
+          // Show the exact error Django gives us (e.g., "Username already exists")
+          setError(Object.values(errorData)[0]?.[0] || 'Registration failed. Try a different username.');
+        }
+      } catch (err) {
+        setError('Cannot connect to server. Is Django running?');
+      }
     }
   };
 
@@ -91,6 +128,7 @@ function AuthPage({ setIsAuthenticated }) {
                         <User className="h-5 w-5 text-stone-400 dark:text-stone-500 transition-colors duration-500" />
                       </div>
                       <input 
+                        id="fullname-input"
                         type="text" 
                         required
                         className="w-full pl-10 pr-4 py-2.5 bg-white/60 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/60 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500 text-stone-800 dark:text-stone-100 backdrop-blur-sm"

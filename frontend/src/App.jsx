@@ -8,7 +8,8 @@ import ThemeToggle from './components/ThemeToggle';
 import Chatbot from './components/Chatbot';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // We check if they have a token saved in their browser! If they do, they stay logged in.
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('access_token'));
   const [isDarkMode, setIsDarkMode] = useState(true);
 
   // Apply dark mode to body for background transition
@@ -93,7 +94,11 @@ function App() {
           <ThemeToggle isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
           {isAuthenticated && (
             <button 
-              onClick={() => setIsAuthenticated(false)}
+              onClick={() => {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                setIsAuthenticated(false);
+              }}
               className="px-6 py-2.5 rounded-xl font-medium text-emerald-800 bg-emerald-100 hover:bg-emerald-200 dark:text-emerald-400 dark:bg-stone-800/80 dark:hover:bg-stone-700 border border-transparent dark:border-stone-700 transition-all shadow-sm"
             >
               Logout

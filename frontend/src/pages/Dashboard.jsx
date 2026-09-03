@@ -3,6 +3,8 @@ import { Droplets, MapPin, CloudRain, Sun, Wind, Leaf, Activity, TrendingDown, I
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 function Dashboard() {
+  const [dbCrops, setDbCrops] = useState([]);
+  const [dbSoils, setDbSoils] = useState([]);
   const [soilType, setSoilType] = useState('');
   const [landArea, setLandArea] = useState('');
   const [areaUnit, setAreaUnit] = useState('hectares');
@@ -10,6 +12,28 @@ function Dashboard() {
   const [location, setLocation] = useState(null);
   const [calculating, setCalculating] = useState(false);
   const [result, setResult] = useState(null);
+
+  // Fetch crops and soils from Django when the dashboard loads
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        };
+
+        const cropRes = await fetch('http://localhost:8000/api/crops/', { headers });
+        if (cropRes.ok) setDbCrops(await cropRes.json());
+
+        const soilRes = await fetch('http://localhost:8000/api/soils/', { headers });
+        if (soilRes.ok) setDbSoils(await soilRes.json());
+      } catch (err) {
+        console.error("Failed to fetch data from backend", err);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleDetectLocation = () => {
     if (navigator.geolocation) {
@@ -32,24 +56,44 @@ function Dashboard() {
     }
   };
 
-  const calculateWaterFootprint = (e) => {
+  const calculateWaterFootprint = async (e) => {
     e.preventDefault();
     setCalculating(true);
     
-    setTimeout(() => {
-      const baseReq = crop === 'wheat' ? 500 : crop === 'rice' ? 1200 : crop === 'corn' ? 700 : 800;
-      const soilFactor = soilType === 'sandy' ? 1.2 : soilType === 'clay' ? 0.9 : 1.0;
+    try {
+      const token = localStorage.getItem('access_token');
       const areaMultiplier = areaUnit === 'hectares' ? Number(landArea) : Number(landArea) * 100;
-      
-      const totalWater = baseReq * soilFactor * areaMultiplier;
-      
-      setResult({
-        totalLiters: (totalWater * 1000).toLocaleString(),
-        dailyLiters: ((totalWater * 1000) / 120).toLocaleString(),
-        efficiency: soilType === 'sandy' ? 'Low' : 'Optimal'
+
+      const response = await fetch('http://localhost:8000/api/calculations/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          crop: crop, // This is now the crop ID from the database
+          soil_type: soilType, // This is now the soil ID
+          land_area: areaMultiplier
+        })
       });
+
+      if (response.ok) {
+        const data = await response.json();
+        setResult({
+          // The backend returns total_water_liters!
+          totalLiters: data.total_water_liters.toLocaleString(),
+          dailyLiters: (data.total_water_liters / 120).toLocaleString(),
+          efficiency: 'Optimal' // We can improve this logic later
+        });
+      } else {
+        alert("Failed to calculate. Make sure you are logged in!");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Cannot connect to server.");
+    } finally {
       setCalculating(false);
-    }, 1500);
+    }
   };
 
   const chartData = [
@@ -140,10 +184,9 @@ function Dashboard() {
                       className="w-full px-4 py-2.5 bg-white/60 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/60 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-stone-800 dark:text-stone-100 backdrop-blur-sm"
                     >
                       <option value="" disabled>Select crop...</option>
-                      <option value="wheat">Wheat</option>
-                      <option value="rice">Rice</option>
-                      <option value="corn">Corn</option>
-                      <option value="cotton">Cotton</option>
+                      {dbCrops.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
                     </select>
                   </div>
 
@@ -157,10 +200,9 @@ function Dashboard() {
                       className="w-full px-4 py-2.5 bg-white/60 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/60 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-stone-800 dark:text-stone-100 backdrop-blur-sm"
                     >
                       <option value="" disabled>Select soil type...</option>
-                      <option value="loamy">Loamy (Ideal)</option>
-                      <option value="sandy">Sandy (High drainage)</option>
-                      <option value="clay">Clay (High retention)</option>
-                      <option value="silt">Silt</option>
+                      {dbSoils.map((s) => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
