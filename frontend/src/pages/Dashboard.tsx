@@ -1,17 +1,43 @@
 import React, { useState } from 'react';
 import { Droplets, MapPin, CloudRain, Sun, Wind, Leaf, Activity, TrendingDown, Info } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import toast from 'react-hot-toast';
+
+interface Crop {
+  id: number;
+  name: string;
+}
+
+interface Soil {
+  id: number;
+  name: string;
+}
+
+interface Location {
+  lat: string;
+  lon: string;
+  climate: string;
+  temp: string;
+  rainfall: string;
+}
+
+interface Result {
+  totalLiters: string;
+  dailyLiters: string;
+  efficiency: string;
+  soilName: string;
+}
 
 function Dashboard() {
-  const [dbCrops, setDbCrops] = useState([]);
-  const [dbSoils, setDbSoils] = useState([]);
-  const [soilType, setSoilType] = useState('');
-  const [landArea, setLandArea] = useState('');
-  const [areaUnit, setAreaUnit] = useState('hectares');
-  const [crop, setCrop] = useState('');
-  const [location, setLocation] = useState(null);
-  const [calculating, setCalculating] = useState(false);
-  const [result, setResult] = useState(null);
+  const [dbCrops, setDbCrops] = useState<Crop[]>([]);
+  const [dbSoils, setDbSoils] = useState<Soil[]>([]);
+  const [soilType, setSoilType] = useState<string>('');
+  const [landArea, setLandArea] = useState<string>('');
+  const [areaUnit, setAreaUnit] = useState<string>('hectares');
+  const [crop, setCrop] = useState<string>('');
+  const [location, setLocation] = useState<Location | null>(null);
+  const [calculating, setCalculating] = useState<boolean>(false);
+  const [result, setResult] = useState<Result | null>(null);
 
   // Fetch crops and soils from Django when the dashboard loads
   React.useEffect(() => {
@@ -25,11 +51,14 @@ function Dashboard() {
 
         const cropRes = await fetch('http://localhost:8000/api/crops/', { headers });
         if (cropRes.ok) setDbCrops(await cropRes.json());
+        else throw new Error("Failed to fetch crops");
 
         const soilRes = await fetch('http://localhost:8000/api/soils/', { headers });
         if (soilRes.ok) setDbSoils(await soilRes.json());
+        else throw new Error("Failed to fetch soils");
       } catch (err) {
         console.error("Failed to fetch data from backend", err);
+        toast.error("Failed to fetch dropdown data from server.");
       }
     };
     fetchData();
@@ -48,15 +77,16 @@ function Dashboard() {
           });
         },
         (error) => {
-          alert("Error getting location: " + error.message);
+          console.error("Error getting location:", error);
+          toast.error("Could not get your location.");
         }
       );
     } else {
-      alert("Geolocation is not supported by this browser.");
+      toast.error("Geolocation is not supported by this browser.");
     }
   };
 
-  const calculateWaterFootprint = async (e) => {
+  const calculateWaterFootprint = async (e: React.FormEvent) => {
     e.preventDefault();
     setCalculating(true);
     
@@ -83,14 +113,15 @@ function Dashboard() {
           // The backend returns total_water_liters!
           totalLiters: data.total_water_liters.toLocaleString(),
           dailyLiters: (data.total_water_liters / 120).toLocaleString(),
-          efficiency: 'Optimal' // We can improve this logic later
+          efficiency: 'Optimal', // We can improve this logic later
+          soilName: data.soil_name
         });
       } else {
-        alert("Failed to calculate. Make sure you are logged in!");
+        toast.error("Failed to calculate. Make sure you are logged in!");
       }
     } catch (err) {
       console.error(err);
-      alert("Cannot connect to server.");
+      toast.error("Cannot connect to server.");
     } finally {
       setCalculating(false);
     }
@@ -103,14 +134,14 @@ function Dashboard() {
   ];
 
   return (
-    <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-1">
+    <div className="max-w-7xl mx-auto w-full grid grid-cols-1 xl:grid-cols-12 gap-6 relative z-1">
       {/* Left Column: Input Form */}
       <div className="lg:col-span-7 space-y-6">
         
         {/* Location & Climate Panel */}
-        <div className="card-3d animate-enter-3d">
-          <section className="card-3d-inner bg-white/70 dark:bg-stone-900/60 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.1)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-emerald-200 dark:border-emerald-900/20 p-6 relative overflow-hidden transition-colors duration-500">
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/50 dark:from-emerald-900/10 to-transparent pointer-events-none transition-colors duration-500"></div>
+        <div className="">
+          <section className="bg-white/90 dark:bg-stone-950/80 backdrop-blur-xl rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-6 relative overflow-hidden transition-colors duration-500">
+            
             <div className="relative">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 flex items-center gap-2 transition-colors duration-500">
@@ -130,23 +161,23 @@ function Dashboard() {
 
               {location ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-white/60 dark:bg-stone-800/60 p-4 rounded-xl border border-stone-200 dark:border-stone-700/40 hover:scale-105 transition-transform duration-500">
+                  <div className="bg-white/90 dark:bg-stone-900/80 backdrop-blur-xl p-4 rounded-xl border border-stone-100 dark:border-stone-800 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-default">
                     <div className="text-xs text-stone-500 dark:text-stone-400 font-medium mb-1 uppercase tracking-wider transition-colors duration-500">Coordinates</div>
                     <div className="text-sm font-semibold text-stone-800 dark:text-stone-100 transition-colors duration-500">{location.lat}, {location.lon}</div>
                   </div>
-                  <div className="bg-white/60 dark:bg-stone-800/60 p-4 rounded-xl border border-stone-200 dark:border-stone-700/40 hover:scale-105 transition-transform duration-500">
+                  <div className="bg-white/90 dark:bg-stone-900/80 backdrop-blur-xl p-4 rounded-xl border border-stone-100 dark:border-stone-800 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-default">
                     <div className="text-xs text-stone-500 dark:text-stone-400 font-medium mb-1 flex items-center gap-1 uppercase tracking-wider transition-colors duration-500">
                       <Sun className="w-3 h-3 text-amber-500 dark:text-current" /> Climate
                     </div>
-                    <div className="text-sm font-semibold text-stone-800 dark:text-stone-100 transition-colors duration-500">{location.climate}</div>
+                    <div className="text-sm font-semibold text-stone-800 dark:text-stone-100 transition-colors duration-500">{location?.climate}</div>
                   </div>
-                  <div className="bg-white/60 dark:bg-stone-800/60 p-4 rounded-xl border border-stone-200 dark:border-stone-700/40 hover:scale-105 transition-transform duration-500">
+                  <div className="bg-white/90 dark:bg-stone-900/80 backdrop-blur-xl p-4 rounded-xl border border-stone-100 dark:border-stone-800 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-default">
                     <div className="text-xs text-stone-500 dark:text-stone-400 font-medium mb-1 flex items-center gap-1 uppercase tracking-wider transition-colors duration-500">
                       <CloudRain className="w-3 h-3 text-blue-500 dark:text-current" /> Rainfall
                     </div>
                     <div className="text-sm font-semibold text-stone-800 dark:text-stone-100 transition-colors duration-500">{location.rainfall}</div>
                   </div>
-                  <div className="bg-white/60 dark:bg-stone-800/60 p-4 rounded-xl border border-stone-200 dark:border-stone-700/40 hover:scale-105 transition-transform duration-500">
+                  <div className="bg-white/90 dark:bg-stone-900/80 backdrop-blur-xl p-4 rounded-xl border border-stone-100 dark:border-stone-800 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-default">
                     <div className="text-xs text-stone-500 dark:text-stone-400 font-medium mb-1 flex items-center gap-1 uppercase tracking-wider transition-colors duration-500">
                       <Wind className="w-3 h-3 text-stone-400 dark:text-current" /> Temp
                     </div>
@@ -154,7 +185,7 @@ function Dashboard() {
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8 bg-white/40 dark:bg-stone-800/40 rounded-xl border border-dashed border-emerald-300 dark:border-stone-700/40 transition-colors duration-500">
+                <div className="text-center py-8 bg-stone-50 dark:bg-stone-900 rounded-xl border border-dashed border-stone-300 dark:border-stone-700 transition-colors duration-500">
                   <p className="text-sm text-stone-500 dark:text-stone-400 transition-colors duration-500">Detect your location to analyze local climate data for accurate water estimation.</p>
                 </div>
               )}
@@ -163,9 +194,9 @@ function Dashboard() {
         </div>
 
         {/* Calculator Form */}
-        <div className="card-3d animate-enter-3d-delay">
-          <section className="card-3d-inner bg-white/70 dark:bg-stone-900/60 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.1)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-emerald-200 dark:border-emerald-900/20 p-6 relative overflow-hidden transition-colors duration-500">
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/50 dark:from-emerald-900/5 to-transparent pointer-events-none transition-colors duration-500"></div>
+        <div className="">
+          <section className="bg-white/90 dark:bg-stone-950/80 backdrop-blur-xl rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-6 relative overflow-hidden transition-colors duration-500">
+            
             <div className="relative">
               <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 flex items-center gap-2 mb-6 transition-colors duration-500">
                 <Leaf className="w-5 h-5 text-emerald-600 dark:text-emerald-400 transition-colors duration-500" />
@@ -181,7 +212,7 @@ function Dashboard() {
                       required
                       value={crop}
                       onChange={(e) => setCrop(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white/60 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/60 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-stone-800 dark:text-stone-100 backdrop-blur-sm"
+                      className="w-full px-4 py-2.5 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-stone-800 dark:text-stone-100 backdrop-blur-sm"
                     >
                       <option value="" disabled>Select crop...</option>
                       {dbCrops.map((c) => (
@@ -197,7 +228,7 @@ function Dashboard() {
                       required
                       value={soilType}
                       onChange={(e) => setSoilType(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white/60 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/60 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-stone-800 dark:text-stone-100 backdrop-blur-sm"
+                      className="w-full px-4 py-2.5 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-stone-800 dark:text-stone-100 backdrop-blur-sm"
                     >
                       <option value="" disabled>Select soil type...</option>
                       {dbSoils.map((s) => (
@@ -218,7 +249,7 @@ function Dashboard() {
                       step="0.1"
                       value={landArea}
                       onChange={(e) => setLandArea(e.target.value)}
-                      className="flex-1 px-4 py-2.5 bg-white/60 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/60 rounded-l-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all border-r-0 text-stone-800 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 backdrop-blur-sm"
+                      className="flex-1 px-4 py-2.5 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded-l-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all border-r-0 text-stone-800 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 backdrop-blur-sm"
                       placeholder="Enter area..."
                     />
                     <select
@@ -258,12 +289,12 @@ function Dashboard() {
 
       {/* Right Column: Results Dashboard */}
       <div className="lg:col-span-5">
-        <div className="card-3d animate-enter-3d-delay-2">
-          <section className="card-3d-inner bg-white/80 dark:bg-stone-950/80 backdrop-blur-xl rounded-3xl shadow-xl dark:shadow-2xl border border-emerald-200 dark:border-stone-800/60 p-8 text-stone-800 dark:text-white h-full sticky top-24 overflow-hidden relative transition-colors duration-500">
+        <div className="">
+          <section className="bg-white/90 dark:bg-stone-950/80 backdrop-blur-xl rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-5 sm:p-8 text-stone-800 dark:text-white h-full sticky top-24 overflow-hidden relative transition-colors duration-500">
             {/* Decorative background element */}
-            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-emerald-400/20 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none transition-colors duration-500"></div>
+            
 
-            <h2 className="text-xl font-semibold mb-8 flex items-center gap-3 relative z-10">
+            <h2 className="text-lg sm:text-xl font-semibold mb-6 sm:mb-8 flex items-center gap-3 relative z-10">
               <div className="p-2 bg-emerald-100 dark:bg-stone-800/50 rounded-lg transition-colors duration-500">
                 <Activity className="w-5 h-5 text-emerald-600 dark:text-emerald-400 transition-colors duration-500" />
               </div>
@@ -271,21 +302,21 @@ function Dashboard() {
             </h2>
             
             {result ? (
-              <div className="space-y-8 relative z-10">
+              <div className="space-y-6 sm:space-y-8 relative z-10">
                 
                 {/* Primary Metric */}
-                <div className="bg-white/60 dark:bg-stone-900/70 rounded-2xl p-6 border border-emerald-100 dark:border-stone-800/50 shadow-sm dark:shadow-inner transition-colors duration-500">
+                <div className="bg-stone-50 dark:bg-stone-900/50 rounded-xl p-5 sm:p-6 border border-stone-200 dark:border-stone-800 transition-colors duration-500">
                   <div className="flex justify-between items-start mb-2">
-                    <div className="text-emerald-700 dark:text-emerald-300 text-xs font-bold tracking-widest uppercase transition-colors duration-500">Total Estimated Water</div>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 transition-colors duration-500">
+                    <div className="text-emerald-700 dark:text-emerald-300 text-[10px] sm:text-xs font-bold tracking-widest uppercase transition-colors duration-500">Total Estimated Water</div>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 transition-colors duration-500">
                       <TrendingDown className="w-3 h-3" /> 12% vs Avg
                     </span>
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-lime-500 dark:from-emerald-300 dark:to-lime-300 transition-colors duration-500">
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-lime-500 dark:from-emerald-300 dark:to-lime-300 transition-colors duration-500">
                       {result.totalLiters}
                     </span>
-                    <span className="text-stone-500 dark:text-stone-400 font-medium transition-colors duration-500">Liters / Cycle</span>
+                    <span className="text-sm sm:text-base text-stone-500 dark:text-stone-400 font-medium transition-colors duration-500">Liters / Cycle</span>
                   </div>
                   
                   {/* Visual Chart */}
@@ -294,7 +325,7 @@ function Dashboard() {
                       <span>Usage Breakdown</span>
                       <span>100%</span>
                     </div>
-                    <div className="h-40 w-full relative -left-4">
+                    <div className="h-32 sm:h-40 w-full relative -left-4">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
@@ -347,7 +378,7 @@ function Dashboard() {
                     <Info className="w-5 h-5 text-emerald-600 dark:text-emerald-400 transition-colors duration-500" />
                   </div>
                   <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed transition-colors duration-500">
-                    Based on your <strong className="text-stone-900 dark:text-white transition-colors duration-500">{location.climate}</strong> climate and <strong className="text-stone-900 dark:text-white transition-colors duration-500">{soilType}</strong> soil profile, we recommend implementing drip irrigation to improve water efficiency by up to 30%.
+                    Based on your <strong className="text-stone-900 dark:text-white transition-colors duration-500">{location?.climate}</strong> climate and <strong className="text-stone-900 dark:text-white transition-colors duration-500">{result.soilName}</strong> soil profile, we recommend implementing drip irrigation to improve water efficiency by up to 30%.
                   </p>
                 </div>
 
@@ -371,3 +402,7 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
+
+
+

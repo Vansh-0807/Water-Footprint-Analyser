@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, ArrowRight, Sprout, CheckCircle2, Droplets } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
-function AuthPage({ setIsAuthenticated }) {
+interface AuthPageProps {
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+function AuthPage({ setIsAuthenticated }: AuthPageProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
@@ -11,7 +16,7 @@ function AuthPage({ setIsAuthenticated }) {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
@@ -37,6 +42,7 @@ function AuthPage({ setIsAuthenticated }) {
         if (response.ok) {
           localStorage.setItem('access_token', data.access);
           localStorage.setItem('refresh_token', data.refresh);
+          toast.success('Login successful! Welcome back.');
           setIsAuthenticated(true);
           navigate('/');
         } else {
@@ -55,7 +61,7 @@ function AuthPage({ setIsAuthenticated }) {
           body: JSON.stringify({ 
             username: username, 
             password: password, 
-            full_name: document.getElementById('fullname-input')?.value || '' 
+            full_name: (document.getElementById('fullname-input') as HTMLInputElement)?.value || '' 
           })
         });
 
@@ -71,13 +77,14 @@ function AuthPage({ setIsAuthenticated }) {
           if (loginResponse.ok) {
             localStorage.setItem('access_token', data.access);
             localStorage.setItem('refresh_token', data.refresh);
+            toast.success('Account created successfully! Welcome to Water Footprint Analyser.');
             setIsAuthenticated(true);
             navigate('/');
           }
         } else {
           const errorData = await registerResponse.json();
           // Show the exact error Django gives us (e.g., "Username already exists")
-          setError(Object.values(errorData)[0]?.[0] || 'Registration failed. Try a different username.');
+          setError((Object.values(errorData)[0] as string[])?.[0] || 'Registration failed. Try a different username.');
         }
       } catch (err) {
         setError('Cannot connect to server. Is Django running?');
@@ -91,24 +98,18 @@ function AuthPage({ setIsAuthenticated }) {
 
         {/* 3D animated water droplet above the card */}
         <div className="flex justify-center mb-6">
-          <div className="animate-droplet-3d">
-            <Droplets className="w-10 h-10 text-emerald-600/60 dark:text-emerald-400/40" />
-          </div>
+          <Droplets className="w-10 h-10 text-emerald-600 dark:text-emerald-500" />
         </div>
         
-        <div className="card-3d">
-          <div className="card-3d-inner bg-white/70 dark:bg-stone-900/70 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.1)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.25)] border border-emerald-200 dark:border-emerald-900/30 p-8 relative overflow-hidden animate-enter-3d transition-colors duration-500">
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/50 dark:from-emerald-900/10 to-transparent pointer-events-none transition-colors duration-500"></div>
+        <div>
+          <div className="bg-white/90 dark:bg-stone-950/80 backdrop-blur-xl rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-8 relative overflow-hidden transition-colors duration-500">
             
             <div className="relative">
               <div className="text-center mb-8">
-                <div className="bg-emerald-100 dark:bg-emerald-900/50 p-3 rounded-2xl shadow-sm dark:shadow-inner inline-block mb-4 transition-colors duration-500">
-                  <Sprout className="w-8 h-8 text-emerald-600 dark:text-emerald-400 transition-colors duration-500" />
-                </div>
                 <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100 transition-colors duration-500">
                   {isForgotPassword 
                     ? 'Reset Password' 
-                    : isLogin ? 'Welcome Back, Farmer' : 'Join Our Community'}
+                    : isLogin ? 'Water Footprint Analyser' : 'Sign Up'}
                 </h2>
                 <p className="text-stone-500 dark:text-stone-400 mt-2 text-sm transition-colors duration-500">
                   {isForgotPassword
@@ -246,3 +247,7 @@ function AuthPage({ setIsAuthenticated }) {
 }
 
 export default AuthPage;
+
+
+
+

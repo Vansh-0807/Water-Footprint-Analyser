@@ -27,7 +27,7 @@ class WaterCalculationSerializer(serializers.ModelSerializer):
 
         # we will tell django not to force the user to provide total_water_liters
         # because django will calculate them 
-        read_only_fields = ['total_water_liters', 'created_at'] 
+        read_only_fields = ['user', 'total_water_liters', 'created_at'] 
 
 class UserSerializer(serializers.ModelSerializer):
     # This line was missing! We MUST define the custom field here so Django knows it's allowed

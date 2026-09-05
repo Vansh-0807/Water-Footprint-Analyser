@@ -1,7 +1,12 @@
 import React from 'react';
 import { Sun, Moon } from 'lucide-react';
 
-export default function ThemeToggle({ isDarkMode, setIsDarkMode }) {
+interface ThemeToggleProps {
+  isDarkMode: boolean;
+  setIsDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export default function ThemeToggle({ isDarkMode, setIsDarkMode }: ThemeToggleProps) {
   return (
     <button
       onClick={() => setIsDarkMode(!isDarkMode)}

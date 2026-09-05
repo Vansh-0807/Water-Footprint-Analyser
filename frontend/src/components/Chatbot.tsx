@@ -5,7 +5,7 @@ function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const [chatHistory, setChatHistory] = useState([
     {
@@ -163,3 +163,4 @@ function Chatbot() {
 }
 
 export default Chatbot;
+
