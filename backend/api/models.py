@@ -3,8 +3,14 @@ from django.contrib.auth.models import User
 
 # crop table
 class Crop(models.Model):
-    # this will hold the name of the Indian Crops
+    # this will hold the name of the Indian Crops in English (Default)
     name = models.CharField(max_length = 100, unique = True)
+    
+    # Translations
+    name_hi = models.CharField(max_length=100, blank=True, null=True)
+    name_mr = models.CharField(max_length=100, blank=True, null=True)
+    name_pa = models.CharField(max_length=100, blank=True, null=True)
+
     # a multiplier used in our math later 
     water_factor = models.FloatField(default = 1.0)
 
@@ -13,8 +19,14 @@ class Crop(models.Model):
 
 # soil table
 class SoilType(models.Model):
-    # this will hold the soil type name 
+    # this will hold the soil type name in English (Default)
     name = models.CharField(max_length=100, unique=True)
+    
+    # Translations
+    name_hi = models.CharField(max_length=100, blank=True, null=True)
+    name_mr = models.CharField(max_length=100, blank=True, null=True)
+    name_pa = models.CharField(max_length=100, blank=True, null=True)
+
     # how well the soil holds water
     retention_factor = models.FloatField(default = 1.0)
 
@@ -41,4 +53,13 @@ class WaterCalculation(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.crop.name} calculation"
+
+class CropDataset(models.Model):
+    name = models.CharField(max_length=255)
+    file = models.FileField(upload_to = 'datasets/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    is_processed = models.BooleanField(default=False, help_text="Has this has been added to the Vector DB?")
+
+    def __str_(self):
+        return self.name
     

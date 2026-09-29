@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CropViewSet, SoilTypeViewSet, WaterCalculationViewSet, UserCreateView
+from .views import CropViewSet, SoilTypeViewSet, WaterCalculationViewSet, UserCreateView, SoilTypeViewSet, ChatbotView
 
 # creating a router and register our viewsets with it
 router = DefaultRouter()
@@ -12,4 +12,5 @@ router.register(r'calculations', WaterCalculationViewSet, basename='calculation'
 urlpatterns = [
     path('', include(router.urls)),
     path('register/', UserCreateView.as_view(), name='register'),
+    path('chat/', ChatbotView.as_view(), name='chatbot-query')
 ]

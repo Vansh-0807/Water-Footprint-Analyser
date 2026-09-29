@@ -7,9 +7,11 @@ import AuthPage from './pages/AuthPage';
 import ThemeToggle from './components/ThemeToggle';
 import Chatbot from './components/Chatbot';
 import AnimatedCrops from './components/AnimatedCrops';
+import { useTranslation } from 'react-i18next';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('access_token'));
+  const { t, i18n } = useTranslation();
+  const [isAuthenticated, setIsAuthenticated] = useState(!!sessionStorage.getItem('access_token'));
   const [isDarkMode, setIsDarkMode] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
@@ -23,8 +25,8 @@ function App() {
   }, [isDarkMode]);
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('refresh_token');
     setIsAuthenticated(false);
     toast.success('You have successfully logged out.', { icon: '👋' });
   };
@@ -45,8 +47,18 @@ function App() {
         </div>
 
         <div className="relative z-10 flex-1 flex flex-col">
-          {/* Top Right Theme Toggle for Auth Page */}
-          <div className="absolute top-6 right-6 z-[100] cursor-pointer">
+          {/* Top Right Theme Toggle and Language Switcher for Auth Page */}
+          <div className="absolute top-6 right-6 z-[100] cursor-pointer flex items-center gap-4">
+            <select 
+              className="bg-white/80 dark:bg-stone-900/80 border border-stone-300 dark:border-stone-700 rounded-lg text-sm px-2 py-1 outline-none text-stone-700 dark:text-stone-300 cursor-pointer backdrop-blur-sm"
+              value={i18n.language}
+              onChange={(e) => i18n.changeLanguage(e.target.value)}
+            >
+              <option value="en" className="dark:bg-stone-900">English</option>
+              <option value="hi" className="dark:bg-stone-900">हिंदी</option>
+              <option value="mr" className="dark:bg-stone-900">मराठी</option>
+              <option value="pa" className="dark:bg-stone-900">ਪੰਜਾਬੀ</option>
+            </select>
             <ThemeToggle isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
           </div>
 
@@ -83,12 +95,23 @@ function App() {
         {/* Left: Project Name */}
         <div className="flex items-center cursor-pointer">
           <h1 className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 hover:scale-[1.02] transition-transform">
-            Water Footprint Analyser
+            {t('app_title')}
           </h1>
         </div>
         
         {/* Right: Actions */}
         <div className="flex items-center gap-3 sm:gap-5">
+          <select 
+            className="bg-transparent border border-stone-300 dark:border-stone-700 rounded-lg text-sm px-2 py-1 outline-none text-stone-700 dark:text-stone-300 cursor-pointer"
+            value={i18n.language}
+            onChange={(e) => i18n.changeLanguage(e.target.value)}
+          >
+            <option value="en" className="dark:bg-stone-900">English</option>
+            <option value="hi" className="dark:bg-stone-900">हिंदी</option>
+            <option value="mr" className="dark:bg-stone-900">मराठी</option>
+            <option value="pa" className="dark:bg-stone-900">ਪੰਜਾਬੀ</option>
+          </select>
+
           <ThemeToggle isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
           
           <button 
@@ -96,7 +119,7 @@ function App() {
             className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-stone-600 dark:text-stone-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
           >
             <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline">Logout</span>
+            <span className="hidden sm:inline">{t('logout')}</span>
           </button>
           
           <div className="h-9 w-9 rounded-full bg-emerald-100 dark:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold shadow-sm">

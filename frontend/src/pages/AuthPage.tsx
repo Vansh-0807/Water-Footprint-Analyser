@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { Mail, Lock, User, ArrowRight, Sprout, CheckCircle2, Droplets } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 interface AuthPageProps {
   setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function AuthPage({ setIsAuthenticated }: AuthPageProps) {
+  const { t } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const [codeSent, setCodeSent] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -19,15 +19,6 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    if (isForgotPassword) {
-      setCodeSent(true);
-      setTimeout(() => {
-        setIsForgotPassword(false);
-        setCodeSent(false);
-      }, 3000);
-      return;
-    }
 
     if (isLogin) {
       try {
@@ -40,8 +31,8 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
         const data = await response.json();
 
         if (response.ok) {
-          localStorage.setItem('access_token', data.access);
-          localStorage.setItem('refresh_token', data.refresh);
+          sessionStorage.setItem('access_token', data.access);
+          sessionStorage.setItem('refresh_token', data.refresh);
           toast.success('Login successful! Welcome back.');
           setIsAuthenticated(true);
           navigate('/');
@@ -107,23 +98,19 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
             <div className="relative">
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100 transition-colors duration-500">
-                  {isForgotPassword 
-                    ? 'Reset Password' 
-                    : isLogin ? 'Water Footprint Analyser' : 'Sign Up'}
+                  {isLogin ? t('app_title') : t('sign_up')}
                 </h2>
                 <p className="text-stone-500 dark:text-stone-400 mt-2 text-sm transition-colors duration-500">
-                  {isForgotPassword
-                    ? (codeSent ? 'Verification code sent! Please check your email.' : 'Enter your registered email address to receive a verification code.')
-                    : isLogin 
-                      ? 'Sign in to access your farm data and water analysis.' 
-                      : 'Create an account to start tracking your water footprint.'}
+                  {isLogin 
+                    ? t('sign_in_msg') 
+                    : t('sign_up_msg')}
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
-                {!isLogin && !isForgotPassword && (
+                {!isLogin && (
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-stone-700 dark:text-stone-300 transition-colors duration-500">Full Name</label>
+                    <label className="text-sm font-medium text-stone-700 dark:text-stone-300 transition-colors duration-500">{t('full_name')}</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <User className="h-5 w-5 text-stone-400 dark:text-stone-500 transition-colors duration-500" />
@@ -140,7 +127,7 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
                 )}
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-stone-700 dark:text-stone-300 transition-colors duration-500">Username</label>
+                  <label className="text-sm font-medium text-stone-700 dark:text-stone-300 transition-colors duration-500">{t('username')}</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <User className="h-5 w-5 text-stone-400 dark:text-stone-500 transition-colors duration-500" />
@@ -165,14 +152,14 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
                 {!isForgotPassword && (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium text-stone-700 dark:text-stone-300 transition-colors duration-500">Password</label>
+                      <label className="text-sm font-medium text-stone-700 dark:text-stone-300 transition-colors duration-500">{t('password')}</label>
                       {isLogin && (
                         <button 
                           type="button"
                           onClick={() => setIsForgotPassword(true)}
                           className="text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
                         >
-                          Forgot password?
+                          {t('forgot_password')}
                         </button>
                       )}
                     </div>
@@ -203,7 +190,7 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
                 >
                   {isForgotPassword 
                     ? (codeSent ? <><CheckCircle2 className="w-5 h-5" /> Code Sent!</> : 'Send Verification Code')
-                    : isLogin ? 'Sign In' : 'Create Account'}
+                    : isLogin ? t('sign_in') : t('create_account')}
                   
                   {!codeSent && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
                 </button>
@@ -226,13 +213,13 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
                   </p>
                 ) : (
                   <p className="text-sm text-stone-500 dark:text-stone-400 transition-colors duration-500">
-                    {isLogin ? "Don't have an account? " : "Already have an account? "}
+                    {isLogin ? `${t('dont_have_account')} ` : `${t('already_have_account')} `}
                     <button 
                       type="button"
                       onClick={() => setIsLogin(!isLogin)}
                       className="font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
                     >
-                      {isLogin ? 'Sign up' : 'Sign in'}
+                      {isLogin ? t('sign_up') : t('sign_in')}
                     </button>
                   </p>
                 )}

@@ -17,11 +17,13 @@ class WaterCalculationSerializer(serializers.ModelSerializer):
     #Instead of just sending their ID numbers to frontend
     crop_name = serializers.CharField(source='crop.name', read_only=True)
     soil_name = serializers.CharField(source='soil_type.name', read_only=True)
+    soil_retention = serializers.FloatField(source='soil_type.retention_factor', read_only=True)
+    crop_factor = serializers.FloatField(source='crop.water_factor', read_only=True)
 
     class Meta:
         model = WaterCalculation
         fields = [
-            'id', 'user', 'crop', 'crop_name', 'soil_type', 'soil_name', 'land_area',
+            'id', 'user', 'crop', 'crop_name', 'crop_factor', 'soil_type', 'soil_name', 'soil_retention', 'land_area',
             'total_water_liters', 'created_at'
         ]
 
@@ -57,4 +59,5 @@ class UserSerializer(serializers.ModelSerializer):
             last_name = last_name
         )
         return user
+
     
