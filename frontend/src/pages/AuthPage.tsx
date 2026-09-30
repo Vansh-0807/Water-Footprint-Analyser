@@ -22,7 +22,7 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
 
     if (isLogin) {
       try {
-        const response = await fetch('http://localhost:8000/api/token/', {
+        const response = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/token/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
@@ -46,7 +46,7 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
       // SIGN UP LOGIC
       try {
         // First we register the user
-        const registerResponse = await fetch('http://localhost:8000/api/register/', {
+        const registerResponse = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/register/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
@@ -58,7 +58,7 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
 
         if (registerResponse.ok) {
           // If registration succeeded, we automatically log them in!
-          const loginResponse = await fetch('http://localhost:8000/api/token/', {
+          const loginResponse = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/token/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
@@ -85,7 +85,7 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
 
   return (
     <div className="flex-1 flex items-center justify-center p-4 relative z-1">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md ">
 
         {/* 3D animated water droplet above the card */}
         <div className="flex justify-center mb-6">
@@ -149,19 +149,9 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
                   </div>
                 )}
 
-                {!isForgotPassword && (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <label className="text-sm font-medium text-stone-700 dark:text-stone-300 transition-colors duration-500">{t('password')}</label>
-                      {isLogin && (
-                        <button 
-                          type="button"
-                          onClick={() => setIsForgotPassword(true)}
-                          className="text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
-                        >
-                          {t('forgot_password')}
-                        </button>
-                      )}
                     </div>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -177,41 +167,17 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
                       />
                     </div>
                   </div>
-                )}
 
                 <button 
                   type="submit"
-                  disabled={codeSent}
-                  className={`w-full mt-6 text-white font-medium py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 group ${
-                    codeSent 
-                      ? 'bg-emerald-500 dark:bg-emerald-600 cursor-not-allowed' 
-                      : 'bg-emerald-600 hover:bg-emerald-500 dark:hover:bg-emerald-500 hover:shadow-lg'
-                  }`}
+                  className="w-full mt-6 text-white font-medium py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 group bg-emerald-600 hover:bg-emerald-500 dark:hover:bg-emerald-500 hover:shadow-lg"
                 >
-                  {isForgotPassword 
-                    ? (codeSent ? <><CheckCircle2 className="w-5 h-5" /> Code Sent!</> : 'Send Verification Code')
-                    : isLogin ? t('sign_in') : t('create_account')}
-                  
-                  {!codeSent && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
+                  {isLogin ? t('sign_in') : t('create_account')}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
               </form>
 
               <div className="mt-8 text-center">
-                {isForgotPassword ? (
-                  <p className="text-sm text-stone-500 dark:text-stone-400 transition-colors duration-500">
-                    Remember your password?{' '}
-                    <button 
-                      type="button"
-                      onClick={() => {
-                        setIsForgotPassword(false);
-                        setCodeSent(false);
-                      }}
-                      className="font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
-                    >
-                      Back to sign in
-                    </button>
-                  </p>
-                ) : (
                   <p className="text-sm text-stone-500 dark:text-stone-400 transition-colors duration-500">
                     {isLogin ? `${t('dont_have_account')} ` : `${t('already_have_account')} `}
                     <button 
@@ -222,7 +188,6 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
                       {isLogin ? t('sign_up') : t('sign_in')}
                     </button>
                   </p>
-                )}
               </div>
             </div>
           </div>

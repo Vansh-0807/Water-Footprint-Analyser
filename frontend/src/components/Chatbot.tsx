@@ -84,7 +84,7 @@ function Chatbot() {
 
     // 4. Send to Backend
     try {
-      const response = await fetch('http://localhost:8000/api/chat/', {
+      const response = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/chat/', {
         method: 'POST',
         body: formData, // Notice we don't set Content-Type; the browser handles the multipart boundary automatically
       });

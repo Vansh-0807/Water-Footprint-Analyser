@@ -65,11 +65,11 @@ function Dashboard() {
           'Content-Type': 'application/json'
         };
 
-        const cropRes = await fetch('http://localhost:8000/api/crops/', { headers });
+        const cropRes = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/crops/', { headers });
         if (cropRes.ok) setDbCrops(await cropRes.json());
         else throw new Error("Failed to fetch crops");
 
-        const soilRes = await fetch('http://localhost:8000/api/soils/', { headers });
+        const soilRes = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/soils/', { headers });
         if (soilRes.ok) setDbSoils(await soilRes.json());
         else throw new Error("Failed to fetch soils");
       } catch (err) {
@@ -150,7 +150,7 @@ function Dashboard() {
       const token = sessionStorage.getItem('access_token');
       const areaMultiplier = areaUnit === 'hectares' ? Number(landArea) : Number(landArea) * 100;
 
-      const response = await fetch('http://localhost:8000/api/calculations/', {
+      const response = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/calculations/', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -230,7 +230,7 @@ function Dashboard() {
         
         {/* Location & Climate Panel */}
         <div className="">
-          <section className="bg-white/90 dark:bg-stone-950/80 backdrop-blur-xl rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-6 relative overflow-hidden transition-colors duration-500">
+          <section className="bg-white/40 dark:bg-stone-950/40 backdrop-blur-xl rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-6 relative overflow-hidden transition-colors duration-500">
             
             <div className="relative">
               <div className="flex items-center justify-between mb-6">
@@ -260,23 +260,23 @@ function Dashboard() {
 
               {location ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-white/90 dark:bg-stone-900/80 backdrop-blur-xl p-4 rounded-xl border border-stone-100 dark:border-stone-800 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-default">
+                  <div className="bg-white/40 dark:bg-stone-900/40 backdrop-blur-xl p-4 rounded-xl border border-stone-100 dark:border-stone-800 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-default">
                     <div className="text-xs text-stone-500 dark:text-stone-400 font-medium mb-1 uppercase tracking-wider transition-colors duration-500">{t('coordinates')}</div>
                     <div className="text-sm font-semibold text-stone-800 dark:text-stone-100 transition-colors duration-500">{location.lat}, {location.lon}</div>
                   </div>
-                  <div className="bg-white/90 dark:bg-stone-900/80 backdrop-blur-xl p-4 rounded-xl border border-stone-100 dark:border-stone-800 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-default">
+                  <div className="bg-white/40 dark:bg-stone-900/40 backdrop-blur-xl p-4 rounded-xl border border-stone-100 dark:border-stone-800 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-default">
                     <div className="text-xs text-stone-500 dark:text-stone-400 font-medium mb-1 flex items-center gap-1 uppercase tracking-wider transition-colors duration-500">
                       <Sun className="w-3 h-3 text-amber-500 dark:text-current" /> {t('climate')}
                     </div>
                     <div className="text-sm font-semibold text-stone-800 dark:text-stone-100 transition-colors duration-500">{location?.climate}</div>
                   </div>
-                  <div className="bg-white/90 dark:bg-stone-900/80 backdrop-blur-xl p-4 rounded-xl border border-stone-100 dark:border-stone-800 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-default">
+                  <div className="bg-white/40 dark:bg-stone-900/40 backdrop-blur-xl p-4 rounded-xl border border-stone-100 dark:border-stone-800 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-default">
                     <div className="text-xs text-stone-500 dark:text-stone-400 font-medium mb-1 flex items-center gap-1 uppercase tracking-wider transition-colors duration-500">
                       <CloudRain className="w-3 h-3 text-blue-500 dark:text-current" /> {t('rainfall')}
                     </div>
                     <div className="text-sm font-semibold text-stone-800 dark:text-stone-100 transition-colors duration-500">{location.rainfall}</div>
                   </div>
-                  <div className="bg-white/90 dark:bg-stone-900/80 backdrop-blur-xl p-4 rounded-xl border border-stone-100 dark:border-stone-800 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-default">
+                  <div className="bg-white/40 dark:bg-stone-900/40 backdrop-blur-xl p-4 rounded-xl border border-stone-100 dark:border-stone-800 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-default">
                     <div className="text-xs text-stone-500 dark:text-stone-400 font-medium mb-1 flex items-center gap-1 uppercase tracking-wider transition-colors duration-500">
                       <Wind className="w-3 h-3 text-stone-400 dark:text-current" /> {t('temp')}
                     </div>
@@ -294,7 +294,7 @@ function Dashboard() {
 
         {/* Calculator Form */}
         <div className="">
-          <section className="bg-white/90 dark:bg-stone-950/80 backdrop-blur-xl rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-6 relative overflow-hidden transition-colors duration-500">
+          <section className="bg-white/40 dark:bg-stone-950/40 backdrop-blur-xl rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-6 relative overflow-hidden transition-colors duration-500">
             
             <div className="relative">
               <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 flex items-center gap-2 mb-6 transition-colors duration-500">
@@ -389,7 +389,7 @@ function Dashboard() {
       {/* Right Column: Results Dashboard */}
       <div className="lg:col-span-5">
         <div className="">
-          <section className="bg-white/90 dark:bg-stone-950/80 backdrop-blur-xl rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-5 sm:p-8 text-stone-800 dark:text-white h-full sticky top-24 overflow-hidden relative transition-colors duration-500">
+          <section className="bg-white/40 dark:bg-stone-950/40 backdrop-blur-xl rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 p-5 sm:p-8 text-stone-800 dark:text-white h-full sticky top-24 overflow-hidden relative transition-colors duration-500">
             {/* Decorative background element */}
             
 

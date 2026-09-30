@@ -6,7 +6,7 @@ import Dashboard from './pages/Dashboard';
 import AuthPage from './pages/AuthPage';
 import ThemeToggle from './components/ThemeToggle';
 import Chatbot from './components/Chatbot';
-import AnimatedCrops from './components/AnimatedCrops';
+import FarmScene from './components/FarmScene';
 import { useTranslation } from 'react-i18next';
 
 function App() {
@@ -34,21 +34,10 @@ function App() {
   if (!isAuthenticated) {
     return (
       <div className={`min-h-screen flex flex-col bg-stone-100 dark:bg-[#0a0a0a] transition-colors duration-300 relative overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
-        
-        {/* Modern SaaS Background Orbs */}
-        <div className="celestial-body sun"></div>
-        <div className="celestial-body moon"></div>
-        <AnimatedCrops />
-        
-        {/* Modern SaaS Background Orbs */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 blur-[100px]" />
-          <div className="absolute top-[60%] -right-[10%] w-[50%] h-[60%] rounded-full bg-teal-500/20 dark:bg-teal-500/10 blur-[120px]" />
-        </div>
-
+        <FarmScene />
         <div className="relative z-10 flex-1 flex flex-col">
           {/* Top Right Theme Toggle and Language Switcher for Auth Page */}
-          <div className="absolute top-6 right-6 z-[100] cursor-pointer flex items-center gap-4">
+          <div className="absolute top-6 right-6 z-[100] cursor-pointer flex items-center gap-4 pointer-events-auto">
             <select 
               className="bg-white/80 dark:bg-stone-900/80 border border-stone-300 dark:border-stone-700 rounded-lg text-sm px-2 py-1 outline-none text-stone-700 dark:text-stone-300 cursor-pointer backdrop-blur-sm"
               value={i18n.language}
@@ -74,27 +63,19 @@ function App() {
 
   return (
     <div className={`flex flex-col h-screen overflow-hidden bg-stone-100 dark:bg-[#0a0a0a] transition-colors duration-300 relative ${isDarkMode ? 'dark' : ''}`}>
-      
-      {/* Modern SaaS Background Orbs */}
-      <div className="celestial-body sun"></div>
-        <div className="celestial-body moon"></div>
-        <AnimatedCrops />
-        
-        {/* Modern SaaS Background Orbs */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-emerald-500/20 dark:bg-emerald-500/10 blur-[100px]" />
-        <div className="absolute top-[60%] -right-[10%] w-[50%] h-[60%] rounded-full bg-teal-500/20 dark:bg-teal-500/10 blur-[120px]" />
-      </div>
-
-      <div className="relative z-10 flex-1 flex flex-col h-full">
+      <FarmScene />
+      <div className="relative z-10 flex-1 flex flex-col h-full ">
       <Toaster position="top-right" toastOptions={{ style: { background: isDarkMode ? '#1c1917' : '#fff', color: isDarkMode ? '#fff' : '#1c1917', border: isDarkMode ? '1px solid #44403c' : '1px solid #e7e5e4' } }} />
       
       {/* Top Header */}
       <header className="h-20 bg-white/70 dark:bg-[#0a0a0a]/70 backdrop-blur-xl border-b border-stone-200 dark:border-stone-800 flex items-center justify-between px-6 sm:px-10 transition-colors duration-300 flex-shrink-0 sticky top-0 z-50">
         
         {/* Left: Project Name */}
-        <div className="flex items-center cursor-pointer">
-          <h1 className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 hover:scale-[1.02] transition-transform">
+        <div className="flex items-center gap-3 cursor-pointer group">
+          <div className="bg-emerald-100 dark:bg-emerald-900/50 p-2 rounded-xl group-hover:scale-105 transition-transform">
+            <Sprout className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-stone-800 dark:text-stone-100 font-serif">
             {t('app_title')}
           </h1>
         </div>
