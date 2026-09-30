@@ -194,3 +194,5 @@ zstandard==0.25.0
 
 gunicorn==23.0.0
 whitenoise==6.7.0
+
+dj-database-url==2.1.0

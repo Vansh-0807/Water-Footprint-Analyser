@@ -79,6 +79,9 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+import dj_database_url
+import os
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -89,6 +92,20 @@ DATABASES = {
         'port' : '3306',
     }
 }
+
+# If deploying to production (e.g. Render) and a DATABASE_URL is provided, override the local MySQL settings
+if os.getenv('DATABASE_URL'):
+    DATABASES['default'] = dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+# If on Render but NO database URL is provided, fall back to SQLite instead of crashing looking for MySQL
+elif os.getenv('RENDER'):
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 
 
 
