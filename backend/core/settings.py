@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-2m_7=hz8!l$%8v=+*g50o3@b=sh)b3#$gs_r=(r0j)9#$@vnx6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['water-footprint-analyser.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -155,10 +155,7 @@ MAILERS = {
     },
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:5174"
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 # tell DRF to use JWT for authentication
 REST_FRAMEWORK = {
