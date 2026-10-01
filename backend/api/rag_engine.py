@@ -13,7 +13,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 # 1. Setup the AI models using your own Gemini API key
-llm = ChatGoogleGenerativeAI(model="gemini-3.8-flash")
+llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite")
 embeddings = GoogleGenerativeAIEmbeddings(model="gemini-embedding-001")
 
 # 2. Setup the local vector database folder
