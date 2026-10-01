@@ -14,7 +14,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 # 1. Setup the AI models using your own Gemini API key
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
-embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+embeddings = GoogleGenerativeAIEmbeddings(model="text-embedding-004")
 
 # 2. Setup the local vector database folder
 CHROMA_DB_DIR = os.path.join(settings.BASE_DIR, "chroma_db")
