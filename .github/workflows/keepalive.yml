@@ -1,0 +1,17 @@
+name: Keep Render Server Awake
+
+on:
+  schedule:
+    # Run every 10 minutes to prevent Render's 15-minute inactivity sleep
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allows you to manually trigger it from GitHub if needed
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the backend
+        run: |
+          echo "Pinging Render server to keep it awake..."
+          curl -sS https://water-footprint-analyser.onrender.com/admin/login/ > /dev/null
+          echo "Ping successful!"
