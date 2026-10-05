@@ -66,8 +66,8 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
           const data = await loginResponse.json();
           
           if (loginResponse.ok) {
-            localStorage.setItem('access_token', data.access);
-            localStorage.setItem('refresh_token', data.refresh);
+            sessionStorage.setItem('access_token', data.access);
+            sessionStorage.setItem('refresh_token', data.refresh);
             toast.success('Account created successfully! Welcome to Water Footprint Analyser.');
             setIsAuthenticated(true);
             navigate('/');
