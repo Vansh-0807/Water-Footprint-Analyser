@@ -47,8 +47,8 @@ class UserSerializer(serializers.ModelSerializer):
         full_name = validated_data.pop('full_name', '')
 
         # 2 split it by the space into a list
-        name_parts = full_name.split(' ')
-        first_name = name_parts[0] if len(name_parts) > 1 else ''
+        name_parts = full_name.strip().split(' ') if full_name.strip() else []
+        first_name = name_parts[0] if len(name_parts) >= 1 else ''
         last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ''
 
         # 3 create the user with the properly split names
