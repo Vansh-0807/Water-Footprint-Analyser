@@ -24,6 +24,12 @@ function App() {
     }
   }, [isDarkMode]);
 
+  useEffect(() => {
+    // Proactively pre-warm backend (Render free tier) the second the app mounts
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    fetch(`${apiUrl}/health/`, { method: 'GET' }).catch(() => {});
+  }, []);
+
   const handleLogout = () => {
     sessionStorage.removeItem('access_token');
     sessionStorage.removeItem('refresh_token');

@@ -166,6 +166,7 @@ MAILERS = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_PREFLIGHT_MAX_AGE = 86400  # Cache CORS preflight (OPTIONS) in browser for 24 hours to avoid 50s delays
 
 # tell DRF to use JWT for authentication
 REST_FRAMEWORK = {
