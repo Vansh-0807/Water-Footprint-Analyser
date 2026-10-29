@@ -19,34 +19,90 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
   const [serverStatus, setServerStatus] = useState<'checking' | 'ready' | 'waking'>('checking');
   const navigate = useNavigate();
 
-  // Pre-warm the backend immediately upon page mount
+  // Pre-warm the backend immediately upon page mount with continuous active polling
   useEffect(() => {
     let isMounted = true;
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
+    let hasAlertedReady = false;
 
-    fetch(`${apiUrl}/health/`, { method: 'GET' })
-      .then((res) => {
-        if (isMounted && res.ok) {
+    const checkServer = async () => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 7000);
+        const res = await fetch(`${apiUrl}/health/`, { 
+          method: 'GET',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!isMounted) return;
+
+        if (res.ok) {
           setServerStatus('ready');
-        } else if (isMounted) {
+          if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
+          }
+          if (hasAlertedReady) {
+            toast.success('Backend server is awake and ready!', { id: 'backend-ready' });
+          }
+        } else {
           setServerStatus('waking');
+          hasAlertedReady = true;
         }
-      })
-      .catch(() => {
-        if (isMounted) setServerStatus('waking');
-      });
-
-    const timer = setTimeout(() => {
-      if (isMounted) {
-        setServerStatus((prev) => (prev === 'ready' ? 'ready' : 'waking'));
+      } catch {
+        if (isMounted) {
+          setServerStatus('waking');
+          hasAlertedReady = true;
+        }
       }
-    }, 2000);
+    };
+
+    // First attempt immediately
+    checkServer();
+
+    // Active polling loop: re-checks every 3.5 seconds until server is ready
+    pollInterval = setInterval(() => {
+      if (!isMounted) return;
+      setServerStatus((current) => {
+        if (current === 'ready') {
+          if (pollInterval) clearInterval(pollInterval);
+          return 'ready';
+        }
+        checkServer();
+        return current;
+      });
+    }, 3500);
 
     return () => {
       isMounted = false;
-      clearTimeout(timer);
+      if (pollInterval) clearInterval(pollInterval);
     };
   }, []);
+
+  // Resilient fetch with automatic cold-start retries
+  const resilientFetch = async (
+    url: string,
+    options: RequestInit,
+    maxAttempts = 7
+  ): Promise<Response> => {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
+        const res = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(timeoutId);
+        return res;
+      } catch (err) {
+        if (attempt === maxAttempts) throw err;
+        setServerStatus('waking');
+        setLoadingMessage(`Server is waking up (cold start)... Retrying (${attempt}/${maxAttempts})...`);
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+      }
+    }
+    throw new Error('Connection timed out while waking server.');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +121,7 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
 
     try {
       if (isLogin) {
-        const response = await fetch(`${apiUrl}/api/token/`, {
+        const response = await resilientFetch(`${apiUrl}/api/token/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
@@ -85,7 +141,7 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
         }
       } else {
         // SIGN UP LOGIC
-        const registerResponse = await fetch(`${apiUrl}/api/register/`, {
+        const registerResponse = await resilientFetch(`${apiUrl}/api/register/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
@@ -96,7 +152,7 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
         });
 
         if (registerResponse.ok) {
-          const loginResponse = await fetch(`${apiUrl}/api/token/`, {
+          const loginResponse = await resilientFetch(`${apiUrl}/api/token/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })

@@ -55,9 +55,10 @@ function Dashboard() {
   const [calculating, setCalculating] = useState<boolean>(false);
   const [result, setResult] = useState<Result | null>(null);
 
-  // Fetch crops and soils from Django when the dashboard loads
+  // Fetch crops and soils from Django when the dashboard loads with automatic cold-start retry
   React.useEffect(() => {
-    const fetchData = async () => {
+    let isMounted = true;
+    const fetchData = async (retryCount = 0) => {
       try {
         const token = sessionStorage.getItem('access_token');
         const headers = {
@@ -65,19 +66,31 @@ function Dashboard() {
           'Content-Type': 'application/json'
         };
 
-        const cropRes = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/crops/', { headers });
-        if (cropRes.ok) setDbCrops(await cropRes.json());
-        else throw new Error("Failed to fetch crops");
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        const cropRes = await fetch(baseUrl + '/api/crops/', { headers });
+        if (!cropRes.ok) throw new Error("Failed to fetch crops");
+        const cropsData = await cropRes.json();
 
-        const soilRes = await fetch((import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/soils/', { headers });
-        if (soilRes.ok) setDbSoils(await soilRes.json());
-        else throw new Error("Failed to fetch soils");
+        const soilRes = await fetch(baseUrl + '/api/soils/', { headers });
+        if (!soilRes.ok) throw new Error("Failed to fetch soils");
+        const soilsData = await soilRes.json();
+
+        if (isMounted) {
+          setDbCrops(cropsData);
+          setDbSoils(soilsData);
+        }
       } catch (err) {
-        console.error("Failed to fetch data from backend", err);
-        toast.error("Failed to fetch dropdown data from server.");
+        if (retryCount < 3 && isMounted) {
+          // If server was sleeping / cold-starting, wait 3 seconds and retry smoothly
+          setTimeout(() => fetchData(retryCount + 1), 3000);
+        } else if (isMounted) {
+          console.error("Failed to fetch data from backend", err);
+          toast.error("Failed to fetch dropdown data from server. Backend may still be starting up.");
+        }
       }
     };
     fetchData();
+    return () => { isMounted = false; };
   }, []);
 
   const fetchWeatherData = async (lat: number, lon: number, loadingToast: string) => {

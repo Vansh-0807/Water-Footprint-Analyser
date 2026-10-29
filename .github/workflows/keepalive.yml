@@ -4,14 +4,15 @@ on:
   schedule:
     # Run every 10 minutes to prevent Render's 15-minute inactivity sleep
     - cron: '*/10 * * * *'
-  workflow_dispatch: # Allows you to manually trigger it from GitHub if needed
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping the backend
+      - name: Ping the backend health endpoint
         run: |
-          echo "Pinging Render server to keep it awake..."
-          curl -sS https://water-footprint-analyser.onrender.com/admin/login/ > /dev/null
-          echo "Ping successful!"
+          echo "Pinging Render server health check to keep it awake..."
+          curl -sS --max-time 60 --retry 3 --retry-delay 5 -f https://water-footprint-analyser.onrender.com/health/ > /dev/null
+          echo "Ping successful! Backend is awake."
+
