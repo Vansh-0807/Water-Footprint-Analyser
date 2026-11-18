@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: wfa_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: water_footprint_db
+      POSTGRES_USER: wfa_user
+      POSTGRES_PASSWORD: wfa_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wfa_user -d water_footprint_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: wfa_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgres://wfa_user:wfa_password@db:5432/water_footprint_db
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/chroma_db:/app/chroma_db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:8000
+    container_name: wfa_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres_data:

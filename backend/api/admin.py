@@ -1,5 +1,7 @@
+import pandas as pd
 from django.contrib import admin
 from .models import CropDataset, Crop, SoilType, WaterCalculation
+from .rag_engine import process_dataset
 
 @admin.register(CropDataset)
 class CropDatasetAdmin(admin.ModelAdmin):
@@ -13,8 +15,6 @@ class CropDatasetAdmin(admin.ModelAdmin):
         if not obj.is_processed:
             try:
                 # read the csv file you just uploaded
-                import pandas as pd
-                from .rag_engine import process_dataset
                 df = pd.read_csv(obj.file.path)
 
                 cols = {str(col).strip().upper(): col for col in df.columns}

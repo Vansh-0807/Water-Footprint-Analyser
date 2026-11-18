@@ -1,3 +1,4 @@
+import pandas as pd
 from rest_framework import viewsets, generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -7,6 +8,7 @@ from .serializers import CropSerializer, SoilTypeSerializer, WaterCalculationSer
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.files.storage import default_storage
+from .rag_engine import process_dataset, ask_chatbot
 
 class UserCreateView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -66,6 +68,5 @@ class ChatbotView(APIView):
             return Response({"error": "No message or file provided"}, status=400)
 
         #Ask the AI!, passing both the text and the picture.
-        from .rag_engine import ask_chatbot
         ai_response = ask_chatbot(user_query, media_file)
         return Response({"reply": ai_response}, status=200)

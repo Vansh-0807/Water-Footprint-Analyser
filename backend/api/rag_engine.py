@@ -4,6 +4,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmb
 from langchain_community.document_loaders import DataFrameLoader
 from langchain_community.vectorstores import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.prompts import ChatPromptTemplate
 from django.conf import settings
 import base64
 from langchain_core.messages import HumanMessage, SystemMessage
