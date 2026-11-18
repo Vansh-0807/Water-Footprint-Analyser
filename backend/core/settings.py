@@ -28,7 +28,8 @@ SECRET_KEY = 'django-insecure-2m_7=hz8!l$%8v=+*g50o3@b=sh)b3#$gs_r=(r0j)9#$@vnx6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['water-footprint-analyser.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['water-footprint-analyser.onrender.com', '.run.app', 'localhost', '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://*.run.app', 'https://water-footprint-analyser.onrender.com']
 
 
 # Application definition
@@ -101,8 +102,8 @@ if os.getenv('DATABASE_URL'):
         conn_max_age=600,
         conn_health_checks=True,
     )
-# If on Render but NO database URL is provided, fall back to SQLite instead of crashing looking for MySQL
-elif os.getenv('RENDER'):
+# If on Render, Google Cloud Run (K_SERVICE), or USE_SQLITE is set without DATABASE_URL, fall back to SQLite
+elif os.getenv('RENDER') or os.getenv('K_SERVICE') or os.getenv('USE_SQLITE'):
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
