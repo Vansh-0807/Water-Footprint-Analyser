@@ -25,7 +25,7 @@ function App() {
   }, [isDarkMode]);
 
   useEffect(() => {
-    // Proactively pre-warm backend (Render free tier) the second the app mounts
+    // Proactively pre-warm backend the second the app mounts
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
     fetch(`${apiUrl}/health/`, { method: 'GET' }).catch(() => {});
   }, []);
@@ -40,7 +40,6 @@ function App() {
   if (!isAuthenticated) {
     return (
       <div className={`min-h-screen flex flex-col bg-stone-100 dark:bg-[#0a0a0a] transition-colors duration-300 relative overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
-        <FarmScene />
         <div className="relative z-10 flex-1 flex flex-col">
           {/* Top Right Theme Toggle and Language Switcher for Auth Page */}
           <div className="absolute top-6 right-6 z-[100] cursor-pointer flex items-center gap-4 pointer-events-auto">
@@ -131,6 +130,3 @@ function App() {
 }
 
 export default App;
-
-
-
