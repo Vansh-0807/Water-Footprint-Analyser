@@ -12,8 +12,7 @@ export default function AuthPage({ setIsAuthenticated }: AuthPageProps) {
 
   // Auto‑login with the demo credentials as soon as the page loads
   useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-    fetch(`${apiUrl}/api/token/`, {
+    fetch('/api/token/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: 'user', password: 'user' }),
