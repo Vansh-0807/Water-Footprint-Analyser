@@ -97,7 +97,7 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
                   {isLogin ? t('app_title') : t('sign_up')}
                 </h2>
                 <p className="text-stone-500 dark:text-stone-400 text-sm mt-1">
-                  {isLogin ? t('login_subtitle') : t('signup_subtitle')}
+                  {isLogin ? 'Sign in to your account' : 'Create a new account'}
                 </p>
               </div>
 
@@ -156,7 +156,7 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
                     </>
                   ) : (
                     <>
-                      {isLogin ? t('login') : t('sign_up')}
+                      {isLogin ? 'Sign In' : 'Sign Up'}
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
@@ -168,16 +168,10 @@ function AuthPage({ setIsAuthenticated }: AuthPageProps) {
                   onClick={() => { setIsLogin(!isLogin); setError(''); }}
                   className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline"
                 >
-                  {isLogin ? t('no_account') : t('have_account')}
+                  {isLogin ? 'Don\'t have an account? Sign Up' : 'Already have an account? Sign In'}
                 </button>
               </div>
 
-              {/* Demo credentials hint */}
-              <div className="mt-4 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-center">
-                <p className="text-xs text-emerald-700 dark:text-emerald-400">
-                  <strong>Demo:</strong> username <code className="bg-emerald-100 dark:bg-emerald-800/50 px-1 rounded">user</code> / password <code className="bg-emerald-100 dark:bg-emerald-800/50 px-1 rounded">user</code>
-                </p>
-              </div>
             </div>
           </div>
         </div>
